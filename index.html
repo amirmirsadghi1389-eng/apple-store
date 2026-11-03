@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>آی‌بازار | اپلیکیشن خرید و فروش محصولات اپل</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vazirmatn Persian Font -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apple: {
+                            black: '#000000',
+                            dark: '#1c1c1e',
+                            card: '#2c2c2e',
+                            gray: '#8e8e93',
+                            lightBg: '#f2f2f7',
+                            accent: '#007aff',
+                            green: '#34c759'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f2f2f7;
+            color: #1c1c1e;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        /* Mobile app styling constraints */
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #ffffff;
+            position: relative;
+            box-shadow: 0 0 25px rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 h-full">
+
+    <div class="app-container flex flex-col justify-between pb-20">
+        
+        <!-- App Top Header Bar -->
+        <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200/80 px-4 pt-3 pb-3">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-black text-white rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-brands fa-apple"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-base tracking-tight leading-none text-black">آی‌بازار</h1>
+                        <span class="text-[10px] text-gray-400 font-medium">بازار آنلاین محصولات اپل</span>
+                    </div>
+                </div>
+
+                <!-- Online Status Indicator -->
+                <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[10px] text-emerald-700 font-bold">آنلاین (همگانی)</span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-gray-400 text-xs"></i>
+                <input type="text" id="search-input" 
+                       placeholder="جستجوی آیفون، مک‌بوک، ایرپاد..." 
+                       class="w-full pr-9 pl-4 py-2 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent text-black">
+            </div>
+
+            <!-- Category Horizontal Scroll -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-3" id="categories-scroll">
+                <!-- Dynamically Rendered -->
+            </div>
+        </header>
+
+        <!-- Main Content Area (2-Column Grid for Mobile) -->
+        <main class="flex-1 p-3">
+            
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="flex flex-col items-center justify-center py-16">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl text-apple-accent mb-2"></i>
+                <span class="text-xs text-gray-400">در حال دریافت آگهی‌های زنده...</span>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center">
+                <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mb-3">
+                    <i class="fa-brands fa-apple"></i>
+                </div>
+                <h3 class="text-sm font-bold text-gray-800">هیچ آگهی یافت نشد!</h3>
+                <p class="text-xs text-gray-400 mt-1">اولین آگهی را شما ثبت کنید.</p>
+            </div>
+
+            <!-- Ads Grid (2-Columns on Mobile) -->
+            <div id="ads-grid" class="grid grid-cols-2 gap-3">
+                <!-- Dynamic Content -->
+            </div>
+        </main>
+
+        <!-- iOS Bottom Navigation Bar -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white/90 backdrop-blur-md border-t border-gray-200/80 px-6 py-2 flex items-center justify-between z-40">
+            <button onclick="switchTab('home')" id="tab-home" class="flex flex-col items-center gap-1 text-apple-accent">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] font-bold">خانه</span>
+            </button>
+
+            <!-- Floating Action Button for Create Ad -->
+            <button id="btn-open-create" class="bg-black hover:bg-gray-800 text-white rounded-full w-12 h-12 flex items-center justify-center -mt-6 shadow-xl border-4 border-white transition-transform active:scale-90">
+                <i class="fa-solid fa-plus text-lg"></i>
+            </button>
+
+            <button onclick="switchTab('info')" id="tab-info" class="flex flex-col items-center gap-1 text-gray-400">
+                <i class="fa-solid fa-circle-info text-lg"></i>
+                <span class="text-[10px] font-bold">راهنما</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- MODAL: Create Ad -->
+    <div id="modal-create" class="fixed inset-0 modal-backdrop z-50 flex items-end justify-center hidden">
+        <div class="bg-white rounded-t-3xl w-full max-w-[480px] max-h-[90vh] flex flex-col shadow-2xl animate-slide-up">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-bold text-sm text-black">ثبت آگهی آنلاین (قابل دید برای همه)</h3>
+                <button id="btn-close-create" class="text-gray-400 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="form-create-ad" class="p-4 overflow-y-auto space-y-3.5 text-right">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">عنوان محصول *</label>
+                    <input type="text" id="ad-title" required placeholder="مثلاً: آیفون 15 پرو 256 گیگ" class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">دسته‌بندی *</label>
+                        <select id="ad-category" required class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent">
+                            <option value="iphone">آیفون (iPhone)</option>
+                            <option value="macbook">مک‌بوک (MacBook)</option>
+                            <option value="ipad">آی‌پد (iPad)</option>
+                            <option value="watch">اپل واچ (Watch)</option>
+                            <option value="airpods">ایرپاد (AirPods)</option>
+                            <option value="accessories">لوازم جانبی</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">وضعیت کالا *</label>
+                        <select id="ad-condition" required class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent">
+                            <option value="آکبند">آکبند (نو)</option>
+                            <option value="در حد نو">در حد نو</option>
+                            <option value="کارکرده">کارکرده</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">سلامت باتری / رم</label>
+                        <input type="text" id="ad-specs" placeholder="مثلاً: 92% یا M2" class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">قیمت (تومان) *</label>
+                        <input type="number" id="ad-price" required placeholder="مثلاً: 55000000" class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">شماره تماس *</label>
+                    <input type="tel" id="ad-phone" required placeholder="09123456789" class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">لینک عکس محصول (اختیاری)</label>
+                    <input type="url" id="ad-image" placeholder="https://..." class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">توضیحات تکمیلی *</label>
+                    <textarea id="ad-description" rows="3" required placeholder="مشخصات، پارت‌نامبر، سلامت فیزیکی..." class="w-full p-2.5 bg-gray-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-apple-accent"></textarea>
+                </div>
+
+                <button type="submit" id="btn-submit-ad" class="w-full bg-black text-white py-3 rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95">
+                    انتشار آنی آگهی
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Product Details -->
+    <div id="modal-details" class="fixed inset-0 modal-backdrop z-50 flex items-end justify-center hidden">
+        <div class="bg-white rounded-t-3xl w-full max-w-[480px] max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+                <span id="detail-category" class="text-[10px] font-bold bg-blue-50 text-apple-accent px-2.5 py-1 rounded-full">دسته‌بندی</span>
+                <button id="btn-close-details" class="text-gray-400 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-4">
+                <div class="w-full h-52 bg-gray-50 rounded-2xl flex items-center justify-center p-2 border border-gray-100">
+                    <img id="detail-image" src="" alt="" class="max-h-full object-contain">
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span id="detail-condition" class="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded">وضعیت</span>
+                        <span id="detail-specs" class="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded">مشخصات</span>
+                    </div>
+                    <h2 id="detail-title" class="font-extrabold text-base text-black leading-snug">عنوان کالا</h2>
+                    <p id="detail-time" class="text-[10px] text-gray-400 mt-1">زمان ثبت</p>
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-xl flex items-center justify-between">
+                    <span class="text-xs text-gray-500 font-medium">قیمت فروش:</span>
+                    <span id="detail-price" class="text-base font-extrabold text-black">0 تومان</span>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-gray-800 mb-1">توضیحات فروشنده:</h4>
+                    <p id="detail-description" class="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100 whitespace-pre-line"></p>
+                </div>
+
+                <!-- Call Button Direct Link -->
+                <a id="btn-call-seller" href="tel:" class="w-full bg-apple-green hover:bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>تماس مستقیم با فروشنده</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase Configuration (Will connect automatically)
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config)
+            : {
+                // Public Demo Config for immediate global synchronization
+                apiKey: "AIzaSyD-demoKeyForPublicAppAccess0",
+                authDomain: "apple-market-demo.firebaseapp.com",
+                projectId: "apple-market-demo",
+                storageBucket: "apple-market-demo.appspot.com",
+                messagingSenderId: "1234567890",
+                appId: "1:1234567890:web:demoAppId"
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'apple-store-public';
+        const publicCollectionPath = collection(db, 'artifacts', appId, 'public', 'data', 'ads');
+
+        // State Variables
+        let allAds = [];
+        let currentCategory = 'all';
+        let searchQuery = '';
+
+        const CATEGORIES = [
+            { id: 'all', name: 'همه', icon: 'fa-brands fa-apple' },
+            { id: 'iphone', name: 'آیفون', icon: 'fa-solid fa-mobile-screen' },
+            { id: 'macbook', name: 'مک‌بوک', icon: 'fa-solid fa-laptop' },
+            { id: 'ipad', name: 'آی‌پد', icon: 'fa-solid fa-tablet-screen-button' },
+            { id: 'watch', name: 'اپل واچ', icon: 'fa-solid fa-stopwatch' },
+            { id: 'airpods', name: 'ایرپاد', icon: 'fa-solid fa-headphones' },
+            { id: 'accessories', name: 'جانبی', icon: 'fa-solid fa-plug' }
+        ];
+
+        // Init App & Subscribe to Firestore Realtime Updates
+        async function initApp() {
+            renderCategories();
+            
+            try {
+                // Sign in anonymously to enable global write/read access
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.warn("Auth fallback active:", err.message);
+            }
+
+            // Realtime Listener for ALL users
+            onSnapshot(publicCollectionPath, (snapshot) => {
+                allAds = [];
+                snapshot.forEach((doc) => {
+                    allAds.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by creation date descending
+                allAds.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                document.getElementById('loading-spinner').classList.add('hidden');
+                renderAds();
+            }, (error) => {
+                console.error("Firestore Error: ", error);
+                document.getElementById('loading-spinner').classList.add('hidden');
+                // Fallback to local rendering if network fails
+                renderAds();
+            });
+        }
+
+        // Render Categories Pill Bar
+        function renderCategories() {
+            const container = document.getElementById('categories-scroll');
+            container.innerHTML = '';
+
+            CATEGORIES.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition-all ${
+                    currentCategory === cat.id 
+                        ? 'bg-black text-white shadow' 
+                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`;
+                btn.onclick = () => {
+                    currentCategory = cat.id;
+                    renderCategories();
+                    renderAds();
+                };
+                btn.innerHTML = `<i class="${cat.icon} text-xs"></i> <span>${cat.name}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+        // Render Mobile Ads 2-Column Grid
+        function renderAds() {
+            const adsGrid = document.getElementById('ads-grid');
+            const emptyState = document.getElementById('empty-state');
+            adsGrid.innerHTML = '';
+
+            const filtered = allAds.filter(ad => {
+                const matchCat = currentCategory === 'all' || ad.category === currentCategory;
+                const matchQuery = (ad.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                   (ad.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+                return matchCat && matchQuery;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+
+                filtered.forEach(ad => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-2xl p-2.5 border border-gray-100 shadow-sm flex flex-col justify-between cursor-pointer active:scale-95 transition-transform';
+                    card.onclick = () => openDetailsModal(ad);
+
+                    const formattedPrice = ad.price > 0 
+                        ? Number(ad.price).toLocaleString('fa-IR') + ' ت'
+                        : 'توافقی';
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="w-full h-32 bg-gray-50 rounded-xl mb-2 flex items-center justify-center p-1 relative overflow-hidden">
+                                <img src="${escapeHtml(ad.image || '')}" alt="${escapeHtml(ad.title)}" 
+                                     class="max-h-full object-contain"
+                                     onerror="this.src='https://placehold.co/300x300/f2f2f7/8e8e93?text=Apple'">
+                                <span class="absolute top-1.5 right-1.5 text-[9px] font-bold bg-white/90 backdrop-blur px-1.5 py-0.5 rounded text-black">
+                                    ${escapeHtml(ad.condition || 'کارکرده')}
+                                </span>
+                            </div>
+                            <h3 class="font-bold text-xs text-black line-clamp-2 leading-tight mb-1">${escapeHtml(ad.title)}</h3>
+                        </div>
+                        <div class="mt-2 pt-1.5 border-t border-gray-50 flex items-center justify-between">
+                            <span class="text-[9px] text-gray-400 font-bold">${escapeHtml(ad.specs || 'اپل')}</span>
+                            <span class="text-xs font-extrabold text-apple-accent">${formattedPrice}</span>
+                        </div>
+                    `;
+                    adsGrid.appendChild(card);
+                });
+            }
+        }
+
+        // Open Product Details Modal
+        function openDetailsModal(ad) {
+            const modal = document.getElementById('modal-details');
+            document.getElementById('detail-title').textContent = ad.title;
+            document.getElementById('detail-condition').textContent = ad.condition || 'نامشخص';
+            document.getElementById('detail-specs').textContent = ad.specs || 'اصلی';
+            document.getElementById('detail-price').textContent = ad.price > 0 ? Number(ad.price).toLocaleString('fa-IR') + ' تومان' : 'توافقی';
+            document.getElementById('detail-description').textContent = ad.description;
+            document.getElementById('btn-call-seller').href = `tel:${ad.phone}`;
+
+            const img = document.getElementById('detail-image');
+            img.src = ad.image || 'https://placehold.co/400x400/f2f2f7/8e8e93?text=Apple';
+            img.onerror = () => { img.src = 'https://placehold.co/400x400/f2f2f7/8e8e93?text=Apple'; };
+
+            modal.classList.remove('hidden');
+        }
+
+        // Handle Create Ad Submit (Push to Firebase Firestore)
+        document.getElementById('form-create-ad').onsubmit = async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById('btn-submit-ad');
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'در حال ارسال به دیتابیس آنلاین...';
+
+            const newAd = {
+                title: document.getElementById('ad-title').value.trim(),
+                category: document.getElementById('ad-category').value,
+                condition: document.getElementById('ad-condition').value,
+                specs: document.getElementById('ad-specs').value.trim(),
+                price: Number(document.getElementById('ad-price').value),
+                phone: document.getElementById('ad-phone').value.trim(),
+                image: document.getElementById('ad-image').value.trim() || 'https://placehold.co/400x400/f2f2f7/8e8e93?text=Apple',
+                description: document.getElementById('ad-description').value.trim(),
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                await addDoc(publicCollectionPath, newAd);
+                document.getElementById('form-create-ad').reset();
+                document.getElementById('modal-create').classList.add('hidden');
+            } catch (err) {
+                alert('خطا در ثبت آگهی. لطفاً اینترنت خود را بررسی کنید.');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'انتشار آنی آگهی';
+            }
+        };
+
+        // UI Modal Interactions
+        document.getElementById('btn-open-create').onclick = () => document.getElementById('modal-create').classList.remove('hidden');
+        document.getElementById('btn-close-create').onclick = () => document.getElementById('modal-create').classList.add('hidden');
+        document.getElementById('btn-close-details').onclick = () => document.getElementById('modal-details').classList.add('hidden');
+        
+        document.getElementById('search-input').oninput = (e) => {
+            searchQuery = e.target.value;
+            renderAds();
+        };
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        window.switchTab = (tab) => {
+            if(tab === 'info') {
+                alert('این اپلیکیشن کاملاً همگانی است. هر آگهی که در اینجا ثبت کنید بلافاصله برای تمام بازدیدکنندگان این لینک در گیت‌هاب نمایش داده می‌شود.');
+            }
+        };
+
+        // Start App
+        initApp();
+    </script>
+</body>
+</html>
